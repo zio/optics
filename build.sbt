@@ -20,12 +20,7 @@ inThisBuild(
         url("https://github.com/adamgfraser")
       )
     ),
-    supportedScalaVersions :=
-      Map(
-        (zioOptics.jvm / thisProject).value.id    -> (zioOptics.jvm / crossScalaVersions).value,
-        (zioOptics.native / thisProject).value.id -> (zioOptics.native / crossScalaVersions).value,
-        (zioOptics.js / thisProject).value.id     -> (zioOptics.js / crossScalaVersions).value.filterNot(_ == scala3.value)
-      )
+    scala213 := "2.13.14"
   )
 )
 
@@ -46,7 +41,7 @@ addCommandAlias(
   ";zioOpticsNative/test:compile"
 )
 
-val zioVersion = "2.0.10"
+val zioVersion = "2.1.7"
 
 lazy val root = project
   .in(file("."))
@@ -63,10 +58,12 @@ lazy val root = project
 
 lazy val zioOptics = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("zio-optics"))
-  .settings(stdSettings(name = "zio-optics", packageName = Some("zio.optics"), enableCrossProject = true))
+  .settings(stdSettings(name = Some("zio-optics"), packageName = Some("zio.optics"), enableCrossProject = true))
   .settings(enableZIO())
   .settings(
-    libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test
+    libraryDependencies += "dev.zio" %%% "zio"          % zioVersion,
+    libraryDependencies += "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
+    libraryDependencies += "dev.zio" %%% "zio-test"     % zioVersion % Test
   )
   .jvmSettings(scala3Settings)
   .jvmSettings(scalaReflectTestSettings)
@@ -89,7 +86,6 @@ lazy val docs = project
     moduleName := "zio-optics-docs",
     scalacOptions -= "-Yno-imports",
     scalacOptions -= "-Xfatal-warnings",
-    crossScalaVersions -= scala211.value,
     projectName := (ThisBuild / name).value,
     mainModuleName := (zioOptics.jvm / moduleName).value,
     projectStage := ProjectStage.Development,
